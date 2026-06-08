@@ -1,0 +1,14 @@
+fastapi
+uvicorn
+sqlalchemy
+psycopg2-binary
+python-multipart
+python-jose[cryptography]
+bcrypt
+fastapi-mail
+deepface
+opencv-python-headless
+cloudinary
+pydantic[email]
+email-validator
+python-dotenv
