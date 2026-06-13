@@ -163,6 +163,10 @@ header {
 .status-warning  { background: #fef08a; color: #a16207; }
 .status-strict-warning { background: #ffedd5; color: #c2410c; }
 .status-blocked  { background: #fee2e2; color: #b91c1c; }
+.status-earlyexit { background: #fff7ed; color: #ea580c; }
+.status-reentered { background: #faf5ff; color: #7e22ce; }
+.status-reexited  { background: #ecfeff; color: #0e7490; }
+.status-late      { background: #fee2e2; color: #dc2626; }
 
 /* Layout utilities */
 .grid-2 {
@@ -192,3 +196,60 @@ header {
 }
 .nav-link:hover { color: var(--primary-blue); }
 .nav-container { max-width: 1280px; margin: 0 auto; width: 100%; }
+
+/* Mobile Responsive Media Queries */
+@media (max-width: 768px) {
+  header {
+    padding: 1rem !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+    align-items: center !important;
+    text-align: center !important;
+  }
+  
+  .main-content {
+    padding: 1rem !important;
+  }
+  
+  .card {
+    padding: 1.5rem 1.25rem !important;
+  }
+  
+  .grid-2 {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .btn {
+    padding: 0.75rem 1rem !important;
+    font-size: 0.875rem !important;
+    width: 100% !important;
+  }
+}
+
+/* Registration Form styles & responsiveness */
+.registration-form {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 3rem;
+}
+.form-row-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+@media (max-width: 768px) {
+  .registration-form {
+    grid-template-columns: 1fr !important;
+    gap: 1.5rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .form-row-grid {
+    grid-template-columns: 1fr !important;
+  }
+}

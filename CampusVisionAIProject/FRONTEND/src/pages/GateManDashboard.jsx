@@ -60,6 +60,13 @@ const getStatusLabel = (student) => {
 };
 
 /* ─── Entry Table ──────────────────────────────────────────── */
+const getBadgeProps = (status, isLate) => {
+  if (status === 'EarlyExit') return { label: 'Early Exit', color: '#ea580c' };
+  if (status === 'Re-entered') return { label: 'Re-entered', color: '#7e22ce' };
+  if (status === 'Re-exited') return { label: 'Re-exited', color: '#0e7490' };
+  return isLate ? { label: 'Late', color: '#ef4444' } : { label: 'On-Time', color: '#22c55e' };
+};
+
 const EntryTable = ({ rows, searchTerm, setSearchTerm }) => {
   const filtered = rows.filter(r => {
     const q = searchTerm.toLowerCase();
@@ -113,10 +120,10 @@ const EntryTable = ({ rows, searchTerm, setSearchTerm }) => {
                     />
                   </td>
                   <td style={{ padding: '12px 16px' }}>
-                    <Badge
-                      label={row.is_late ? 'Late' : 'On-Time'}
-                      color={row.is_late ? '#ef4444' : '#22c55e'}
-                    />
+                    {(() => {
+                      const { label, color } = getBadgeProps(row.status, row.is_late);
+                      return <Badge label={label} color={color} />;
+                    })()}
                   </td>
                 </tr>
               ))}

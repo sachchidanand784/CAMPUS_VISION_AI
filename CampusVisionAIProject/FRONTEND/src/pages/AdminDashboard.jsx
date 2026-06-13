@@ -38,12 +38,20 @@ const getStatusLabel = (student) => {
 
 const getLogStatusClass = (statusStr, isLate) => {
   const s = (statusStr || '').toLowerCase();
+  if (s === 'earlyexit') return 'status-earlyexit';
+  if (s === 're-entered') return 'status-reentered';
+  if (s === 're-exited') return 'status-reexited';
   if (s.includes('block')) return 'status-blocked';
   if (s === 'strict-warning') return 'status-strict-warning';
   if (s.includes('warning')) return 'status-warning';
-  // fallback if status string doesn't exist but is_late is true
-  if (isLate && !s.includes('present')) return 'status-blocked';
+  if (isLate || s.includes('late')) return 'status-late';
   return 'status-present';
+};
+
+const getStatusText = (statusStr, isLate) => {
+  if (!statusStr) return isLate ? 'Late' : 'On-Time';
+  if (statusStr === 'EarlyExit') return 'Early Exit';
+  return statusStr;
 };
 
 /* ─── Generic Modal shell ──────────────────────────────── */
@@ -155,7 +163,7 @@ const SettingsView = ({ token, apiUrl }) => {
   };
 
   const timeFld = (label, key) => (
-    <div style={{ flex: 1 }}>
+    <div style={{ flex: '1 1 140px' }}>
       <label style={{ fontSize: '0.7rem', fontWeight: 700, color: '#64748b', display: 'block', marginBottom: '4px' }}>{label}</label>
       <input type="time" value={dateTiming[key] || ''}
         onChange={e => setDateTiming(p => ({ ...p, [key]: e.target.value }))}
@@ -418,8 +426,8 @@ const TodayEntriesModal = ({ entries, onClose, onRefresh, titlePrefix = "Today's
                     : <span style={{ color: '#f59e0b', fontSize: '0.75rem', fontWeight: 600 }}>Still Inside</span>}
                 </td>
                 <td style={{ padding: '11px 14px' }}>
-                  <span style={{ fontSize: '0.7rem', fontWeight: 700, padding: '3px 8px', borderRadius: '6px', background: e.is_late ? '#fee2e2' : '#dcfce7', color: e.is_late ? '#dc2626' : '#16a34a' }}>
-                    {e.is_late ? 'Late' : 'On-Time'}
+                  <span className={`status-badge ${getLogStatusClass(e.status, e.is_late)}`} style={{ padding: '3px 8px', borderRadius: '6px', fontSize: '0.7rem' }}>
+                    {getStatusText(e.status, e.is_late)}
                   </span>
                 </td>
                 <td style={{ padding: '11px 14px' }}>
@@ -459,7 +467,7 @@ const LogsModal = ({ logs, onClose }) => (
               <td style={{ padding: '11px 14px', color: '#475569' }}>{log.exit_time ? fmtDateTime(log.exit_time) : <span style={{ color: '#94a3b8', fontStyle: 'italic' }}>—</span>}</td>
               <td style={{ padding: '11px 14px' }}>
                 <span className={`status-badge ${getLogStatusClass(log.status, log.is_late)}`} style={{ padding: '3px 8px', borderRadius: '6px', fontSize: '0.7rem' }}>
-                  {log.status}
+                  {getStatusText(log.status, log.is_late)}
                 </span>
               </td>
               <td style={{ padding: '11px 14px' }}>
@@ -595,7 +603,7 @@ const AdminDashboard = ({ token }) => {
                   <td style={{ padding: '12px 20px' }}>{fmtDateTime(log.entry_time)}</td>
                   <td style={{ padding: '12px 20px' }}>
                     <span className={`status-badge ${getLogStatusClass(log.status, log.is_late)}`} style={{ padding: '3px 8px', borderRadius: '6px', fontSize: '0.7rem' }}>
-                      {log.status}
+                      {getStatusText(log.status, log.is_late)}
                     </span>
                   </td>
                   <td style={{ padding: '12px 20px' }}>

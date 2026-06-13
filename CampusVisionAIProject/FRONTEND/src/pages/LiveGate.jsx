@@ -39,7 +39,13 @@ const LiveGate = () => {
 
       setStatus('success');
       setShowWebcam(false);
-      setMessage(`${mode === 'entry' ? 'Entry' : 'Exit'} Authorized: Welcome ${res.data.status === 'blocked' ? 'Blocked' : 'Student'}`);
+      let detail = 'Authorized';
+      if (res.data.status === 'EarlyExit') detail = 'Early Exit';
+      else if (res.data.status === 'Re-entered') detail = 'Re-entered';
+      else if (res.data.status === 'Re-exited') detail = 'Re-exited';
+      else if (res.data.status === 'LateEntry' || res.data.is_late) detail = 'Late Entry';
+      else detail = 'On Time';
+      setMessage(`${mode === 'entry' ? 'Entry' : 'Exit'} Authorized: ${detail}`);
       setTimeout(() => {
         setStatus('idle');
         setMessage('System ready for next scan');
@@ -72,7 +78,13 @@ const LiveGate = () => {
         lon: coords.lon
       });
       setStatus('success');
-      setMessage(`Manual Entry Authorized for ${manualId}`);
+      let detail = 'Authorized';
+      if (res.data.status === 'EarlyExit') detail = 'Early Exit';
+      else if (res.data.status === 'Re-entered') detail = 'Re-entered';
+      else if (res.data.status === 'Re-exited') detail = 'Re-exited';
+      else if (res.data.status === 'LateEntry' || res.data.is_late) detail = 'Late Entry';
+      else detail = 'On Time';
+      setMessage(`Manual Entry Authorized for ${manualId}: ${detail}`);
       setTimeout(() => {
         setStatus('idle');
         setManualId('');
@@ -85,11 +97,11 @@ const LiveGate = () => {
   };
 
   return (
-    <div className="animate-fade-in" style={{ padding: '2rem' }}>
+    <div className="main-content animate-fade-in">
       <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap' }}>
         
         {/* Left Side: Monitor */}
-        <div style={{ flex: '1.5', minWidth: '400px' }}>
+        <div style={{ flex: '1.5', minWidth: '280px' }}>
             <div className="card" style={{ padding: 0, overflow: 'hidden', height: '100%', position: 'relative' }}>
                 <div style={{ 
                     position: 'absolute', top: '1.5rem', left: '1.5rem', zIndex: 10,
@@ -153,7 +165,7 @@ const LiveGate = () => {
         </div>
 
         {/* Right Side: Controls */}
-        <div style={{ flex: '1', minWidth: '300px', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+        <div style={{ flex: '1', minWidth: '280px', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
             <div className="card glass-effect" style={{ borderTop: '4px solid #3b82f6' }}>
                 <h3 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <UserCheck size={24} color="#3b82f6" /> Student Attendance

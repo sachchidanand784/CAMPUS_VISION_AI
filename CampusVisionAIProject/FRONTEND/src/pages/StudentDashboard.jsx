@@ -52,36 +52,54 @@ const StatusCircle = ({ done, label, color, icon: Icon, time }) => (
 );
 
 /* ─── History Row Component ──────────────────────────────── */
-const HistoryRow = ({ rec, isEven }) => (
-  <tr style={{ borderBottom: '1px solid #f1f5f9', background: isEven ? 'white' : '#fafafa' }}>
-    <td style={{ padding: '12px 16px' }}>
-      <div style={{ fontWeight: 600, fontSize: '0.875rem' }}>{fmtDay(rec.entry_time)}</div>
-      <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>{fmtDate(rec.entry_time)}</div>
-    </td>
-    <td style={{ padding: '12px 16px', fontWeight: 600, color: '#1e293b', fontSize: '0.875rem' }}>{fmtTime(rec.entry_time)}</td>
-    <td style={{ padding: '12px 16px', color: '#475569', fontSize: '0.875rem' }}>
-      {rec.exit_time ? fmtTime(rec.exit_time) : <span style={{ color: '#94a3b8', fontStyle: 'italic', fontSize: '0.8rem' }}>No exit</span>}
-    </td>
-    <td style={{ padding: '12px 16px' }}>
-      <span style={{
-        fontSize: '0.7rem', fontWeight: 700, padding: '3px 8px', borderRadius: '6px',
-        background: rec.is_late ? '#fee2e2' : '#dcfce7',
-        color: rec.is_late ? '#dc2626' : '#16a34a',
-      }}>
-        {rec.is_late ? 'Late' : 'On-Time'}
-      </span>
-    </td>
-    <td style={{ padding: '12px 16px' }}>
-      <span style={{
-        fontSize: '0.7rem', fontWeight: 600, padding: '3px 8px', borderRadius: '6px',
-        background: rec.marked_by === 'gateman' ? '#fef3c7' : '#f0f9ff',
-        color: rec.marked_by === 'gateman' ? '#92400e' : '#0369a1',
-      }}>
-        {rec.marked_by === 'gateman' ? 'Gate Man' : 'Self'}
-      </span>
-    </td>
-  </tr>
-);
+const HistoryRow = ({ rec, isEven }) => {
+  const getBadgeStyle = () => {
+    switch (rec.status) {
+      case 'EarlyExit':
+        return { bg: '#fff7ed', fg: '#ea580c', text: 'Early Exit' };
+      case 'Re-entered':
+        return { bg: '#faf5ff', fg: '#7e22ce', text: 'Re-entered' };
+      case 'Re-exited':
+        return { bg: '#ecfeff', fg: '#0e7490', text: 'Re-exited' };
+      default:
+        return rec.is_late 
+          ? { bg: '#fee2e2', fg: '#dc2626', text: 'Late' }
+          : { bg: '#dcfce7', fg: '#16a34a', text: 'On-Time' };
+    }
+  };
+  const badge = getBadgeStyle();
+
+  return (
+    <tr style={{ borderBottom: '1px solid #f1f5f9', background: isEven ? 'white' : '#fafafa' }}>
+      <td style={{ padding: '12px 16px' }}>
+        <div style={{ fontWeight: 600, fontSize: '0.875rem' }}>{fmtDay(rec.entry_time)}</div>
+        <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>{fmtDate(rec.entry_time)}</div>
+      </td>
+      <td style={{ padding: '12px 16px', fontWeight: 600, color: '#1e293b', fontSize: '0.875rem' }}>{fmtTime(rec.entry_time)}</td>
+      <td style={{ padding: '12px 16px', color: '#475569', fontSize: '0.875rem' }}>
+        {rec.exit_time ? fmtTime(rec.exit_time) : <span style={{ color: '#94a3b8', fontStyle: 'italic', fontSize: '0.8rem' }}>No exit</span>}
+      </td>
+      <td style={{ padding: '12px 16px' }}>
+        <span style={{
+          fontSize: '0.7rem', fontWeight: 700, padding: '3px 8px', borderRadius: '6px',
+          background: badge.bg,
+          color: badge.fg,
+        }}>
+          {badge.text}
+        </span>
+      </td>
+      <td style={{ padding: '12px 16px' }}>
+        <span style={{
+          fontSize: '0.7rem', fontWeight: 600, padding: '3px 8px', borderRadius: '6px',
+          background: rec.marked_by === 'gateman' ? '#fef3c7' : '#f0f9ff',
+          color: rec.marked_by === 'gateman' ? '#92400e' : '#0369a1',
+        }}>
+          {rec.marked_by === 'gateman' ? 'Gate Man' : 'Self'}
+        </span>
+      </td>
+    </tr>
+  );
+};
 
 /* ─── Status Helpers ─────────────────────────────────────── */
 const getStatusClasses = (student) => {
@@ -104,9 +122,19 @@ const StudentDashboard = ({ token }) => {
   const webcamRef = useRef(null);
   const headers   = { Authorization: `Bearer ${token}` };
 
+  /* Helper to get local date string YYYY-MM-DD */
+  const getTodayStr = () => {
+    const d = new Date();
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
   /* state */
   const [profile,      setProfile]      = useState(null);
   const [todayStatus,  setTodayStatus]  = useState(null);   // { has_entry, has_exit, entry_time, exit_time, is_late }
+  const [dateTiming,   setDateTiming]   = useState(null);   // custom admin timings
   const [history,      setHistory]      = useState([]);
   const [showCamera,   setShowCamera]   = useState(false);
   const [cameraMode,   setCameraMode]   = useState(null);   // 'entry' | 'exit'
@@ -129,6 +157,14 @@ const StudentDashboard = ({ token }) => {
     } catch { setTodayStatus(null); }
   }, [token]);
 
+  const fetchDateTiming = useCallback(async () => {
+    try {
+      const todayStr = getTodayStr();
+      const res = await axios.get(`${API}/api/settings/date-timing?date=${todayStr}`, { headers });
+      setDateTiming(res.data);
+    } catch { setDateTiming(null); }
+  }, [token]);
+
   const fetchHistory = useCallback(async () => {
     try {
       const res = await axios.get(`${API}/api/attendance/my/history`, { headers });
@@ -139,6 +175,7 @@ const StudentDashboard = ({ token }) => {
   useEffect(() => {
     fetchProfile();
     fetchToday();
+    fetchDateTiming();
   }, [token]);
 
   /* auto-dismiss feedback after 5 s */
@@ -182,11 +219,15 @@ const StudentDashboard = ({ token }) => {
       if (cameraMode === 'exit') {
          if (data.status === 'EarlyExit') {
             label = 'Exit Marked Successfully (Early Exit)';
+         } else if (data.status === 'Re-exited') {
+            label = 'Exit Marked Successfully (Re-exited)';
          } else {
             label = 'Exit Marked Successfully (On Time)';
          }
       } else {
-         if (data.status === 'LateEntry' || data.is_late) {
+         if (data.status === 'Re-entered') {
+            label = 'Entry Marked Successfully (Re-entered)';
+         } else if (data.status === 'LateEntry' || data.is_late) {
             label = 'Entry Marked Successfully (Late Entry)';
          } else {
             label = 'Entry Marked Successfully (On Time)';
@@ -261,11 +302,11 @@ const StudentDashboard = ({ token }) => {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
 
           {/* Left: circles */}
-          <div>
+          <div style={{ flex: '1', minWidth: '280px' }}>
             <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#94a3b8', letterSpacing: '0.08em', marginBottom: '16px', textTransform: 'uppercase' }}>
               Today's Attendance Status — {new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' })}
             </div>
-            <div style={{ display: 'flex', gap: '40px', alignItems: 'flex-start' }}>
+            <div style={{ display: 'flex', gap: '24px', alignItems: 'flex-start', flexWrap: 'wrap' }}>
               <StatusCircle
                 done={todayStatus?.has_entry}
                 label="Entry"
@@ -274,7 +315,7 @@ const StudentDashboard = ({ token }) => {
                 time={todayStatus?.has_entry ? fmtTime(todayStatus.entry_time) : 'Not marked'}
               />
               {/* connector line */}
-              <div style={{ marginTop: '35px', flex: 1, maxWidth: '60px', height: '2px', background: todayStatus?.has_entry ? '#22c55e44' : '#e2e8f0', borderRadius: '2px' }}></div>
+              <div className="hide-on-mobile" style={{ marginTop: '35px', flex: 1, maxWidth: '60px', height: '2px', background: todayStatus?.has_entry ? '#22c55e44' : '#e2e8f0', borderRadius: '2px' }}></div>
               <StatusCircle
                 done={todayStatus?.has_exit}
                 label="Exit"
@@ -283,26 +324,96 @@ const StudentDashboard = ({ token }) => {
                 time={todayStatus?.has_exit ? fmtTime(todayStatus.exit_time) : 'Not marked'}
               />
             </div>
+
+            {/* Custom Admin Timings display */}
+            <div style={{ 
+              marginTop: '1.5rem', 
+              padding: '12px 16px', 
+              background: '#f8fafc', 
+              borderRadius: '12px', 
+              border: '1px solid #e2e8f0',
+              display: 'flex',
+              gap: '20px',
+              flexWrap: 'wrap',
+              fontSize: '0.82rem',
+              color: '#475569'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Clock3 size={15} color="#3b82f6" />
+                <span>
+                  <strong>Entry Deadline:</strong> {dateTiming?.entry_end 
+                    ? dateTiming.entry_end.substring(0, 5) 
+                    : '09:00'} (Avoid Late)
+                </span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Timer size={15} color="#f97316" />
+                <span>
+                  <strong>Allowed Exit:</strong> {dateTiming?.exit_start 
+                    ? dateTiming.exit_start.substring(0, 5) 
+                    : '16:00'} (Avoid Early Exit)
+                </span>
+              </div>
+            </div>
           </div>
 
           {/* Right: late/on-time badge */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', alignItems: 'flex-end' }}>
-            {todayStatus?.has_entry ? (
-              <div style={{
-                padding: '14px 22px', borderRadius: '16px', textAlign: 'center',
-                background: todayStatus.is_late ? '#fff1f2' : '#f0fdf4',
-                border: `1px solid ${todayStatus.is_late ? '#fca5a5' : '#86efac'}`,
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 800, fontSize: '1rem', color: todayStatus.is_late ? '#dc2626' : '#16a34a' }}>
-                  {todayStatus.is_late ? <AlertTriangle size={20} /> : <ShieldCheck size={20} />}
-                  {todayStatus.is_late ? 'LATE ARRIVAL' : 'ON TIME ✓'}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', alignItems: 'flex-end', minWidth: '240px' }}>
+            {todayStatus?.has_entry ? (() => {
+              let badgeColor = '#16a34a';
+              let badgeBg = '#f0fdf4';
+              let badgeBorder = '#86efac';
+              let title = 'ON TIME ✓';
+              let desc = 'Good punctuality today!';
+              let icon = <ShieldCheck size={20} />;
+
+              if (todayStatus.status === 'EarlyExit') {
+                badgeColor = '#ea580c';
+                badgeBg = '#fff7ed';
+                badgeBorder = '#fdba74';
+                title = 'EARLY EXIT';
+                desc = 'Exited before authorized timing';
+                icon = <AlertTriangle size={20} />;
+              } else if (todayStatus.status === 'Re-entered') {
+                badgeColor = '#7e22ce';
+                badgeBg = '#faf5ff';
+                badgeBorder = '#d8b4fe';
+                title = 'RE-ENTERED';
+                desc = 'Returned to campus';
+                icon = <RefreshCw size={20} />;
+              } else if (todayStatus.status === 'Re-exited') {
+                badgeColor = '#0e7490';
+                badgeBg = '#ecfeff';
+                badgeBorder = '#67e8f9';
+                title = 'RE-EXITED';
+                desc = 'Re-exited campus';
+                icon = <CheckCircle2 size={20} />;
+              } else if (todayStatus.is_late) {
+                badgeColor = '#dc2626';
+                badgeBg = '#fff1f2';
+                badgeBorder = '#fca5a5';
+                title = 'LATE ARRIVAL';
+                desc = 'Infraction recorded on your account';
+                icon = <AlertTriangle size={20} />;
+              }
+
+              return (
+                <div style={{
+                  padding: '14px 22px', borderRadius: '16px', textAlign: 'center', width: '100%',
+                  background: badgeBg,
+                  border: `1px solid ${badgeBorder}`,
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontWeight: 800, fontSize: '1rem', color: badgeColor }}>
+                    {icon}
+                    {title}
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '4px' }}>
+                    {desc}
+                  </div>
                 </div>
-                <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '4px' }}>
-                  {todayStatus.is_late ? 'Infraction recorded on your account' : 'Good punctuality today!'}
-                </div>
-              </div>
-            ) : (
-              <div style={{ padding: '14px 22px', borderRadius: '16px', background: '#f8fafc', border: '1px solid #e2e8f0', textAlign: 'center' }}>
+              );
+            })() : (
+              <div style={{ padding: '14px 22px', borderRadius: '16px', background: '#f8fafc', border: '1px solid #e2e8f0', textAlign: 'center', width: '100%' }}>
                 <div style={{ fontSize: '0.875rem', color: '#94a3b8', fontWeight: 600 }}>No entry yet today</div>
                 <div style={{ fontSize: '0.75rem', color: '#cbd5e1', marginTop: '4px' }}>Mark entry to begin your day</div>
               </div>
@@ -322,7 +433,7 @@ const StudentDashboard = ({ token }) => {
       <div className="grid-2" style={{ marginBottom: '1.5rem' }}>
         {/* Profile Card */}
         <div className="card glass-effect" style={{ borderTop: '4px solid #3b82f6' }}>
-          <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'flex-start' }}>
+          <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'flex-start', flexWrap: 'wrap' }}>
             <div style={{ position: 'relative', flexShrink: 0 }}>
               <img
                 src={profile.face_image_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${profile.name}`}

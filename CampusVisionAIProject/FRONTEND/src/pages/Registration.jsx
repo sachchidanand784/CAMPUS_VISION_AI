@@ -68,7 +68,7 @@ const Registration = () => {
         <p style={{ color: '#64748b' }}>Register as <strong style={{ color: 'var(--primary-blue)' }}>{selectedRole === 'gateman' ? 'GATE MAN' : selectedRole === 'admin' ? 'ADMIN' : 'STUDENT'}</strong></p>
       </div>
 
-      <div className="card" style={{ padding: '3rem' }}>
+      <div className="card">
         {status && (
             <div style={{ 
                 padding: '1rem 1.5rem', borderRadius: '12px', marginBottom: '2rem',
@@ -80,7 +80,7 @@ const Registration = () => {
             </div>
         )}
         
-        <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: selectedRole === 'student' ? '1.2fr 0.8fr' : '1fr', gap: '3rem' }}>
+        <form className={selectedRole === 'student' ? "registration-form" : ""} onSubmit={handleSubmit} style={selectedRole === 'student' ? {} : { display: 'grid', gridTemplateColumns: '1fr', gap: '3rem' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
             <h3 style={{ marginBottom: '0.5rem', fontSize: '1.25rem' }}>Personal Credentials</h3>
             
@@ -89,7 +89,7 @@ const Registration = () => {
                 <input placeholder="Enter Email" type="email" required style={{ paddingLeft: '3rem' }} onChange={e=>setFormData({...formData, email: e.target.value})} />
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+            <div className="form-row-grid">
                 <div className="form-group"><input placeholder="Full Name" required onChange={e=>setFormData({...formData, name: e.target.value})} /></div>
                 {selectedRole !== 'admin' && (
                   <div className="form-group">
@@ -102,7 +102,7 @@ const Registration = () => {
                 )}
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+            <div className="form-row-grid">
                 <div className="form-group"><input placeholder="Mobile Number" required onChange={e=>setFormData({...formData, mobile: e.target.value})} /></div>
                 {selectedRole === 'student' && (
                   <div className="form-group">

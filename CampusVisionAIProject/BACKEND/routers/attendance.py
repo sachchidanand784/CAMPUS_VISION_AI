@@ -181,54 +181,72 @@ async def mark_exit(
 async def process_attendance(user: models.User, db: Session, force_exit: bool = False, marked_by: str = "student"):
     try:
         now = datetime.now(timezone.utc)
+        today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
         
-        # Handle Exit Explicitly if requested or if entry exists
-        last_open = db.query(models.Attendance)\
-            .filter(models.Attendance.student_id == user.id, models.Attendance.exit_time == None)\
+        # Check if there is already any attendance record for this student today
+        today_record = db.query(models.Attendance)\
+            .filter(
+                models.Attendance.student_id == user.id,
+                models.Attendance.entry_time >= today_start
+            )\
             .order_by(models.Attendance.id.desc()).first()
 
-        if last_open:
-            if last_open.entry_time.astimezone(timezone.utc).date() == now.date() or force_exit:
-                last_open.exit_time = now
-                last_open.marked_by = marked_by # Update who marked the exit
-                
-                # Check Early Exit
-                is_early = False
-                today_str = now.strftime("%Y-%m-%d")
-                current_time = now.time()
-                date_timing = db.query(models.DateTiming).filter(models.DateTiming.date == today_str).first()
-                if date_timing and date_timing.exit_start:
-                    is_early = current_time < date_timing.exit_start
-                else:
-                    is_early = current_time < time(16, 0) # 4:00 PM default 
-                
-                last_open.status = "EarlyExit" if is_early else "OnTime"
-                
-                db.commit()
-                db.refresh(last_open)
-                return last_open
-                
+        # Handle Exit (force_exit=True)
         if force_exit:
+            if today_record:
+                if today_record.status == "Re-entered" or today_record.exit_time is not None:
+                    today_record.exit_time = now
+                    today_record.status = "Re-exited"
+                    today_record.marked_by = marked_by
+                    db.commit()
+                    db.refresh(today_record)
+                    return today_record
+                
+                if today_record.exit_time is None:
+                    today_record.exit_time = now
+                    today_record.marked_by = marked_by
+                    
+                    # Check Early Exit
+                    is_early = False
+                    today_str = now.strftime("%Y-%m-%d")
+                    current_time = now.time()
+                    date_timing = db.query(models.DateTiming).filter(models.DateTiming.date == today_str).first()
+                    if date_timing and date_timing.exit_start:
+                        is_early = current_time < date_timing.exit_start
+                    else:
+                        is_early = current_time < time(16, 0) # 4:00 PM default 
+                    
+                    today_record.status = "EarlyExit" if is_early else "OnTime"
+                    db.commit()
+                    db.refresh(today_record)
+                    return today_record
+            
             raise HTTPException(status_code=400, detail="No active entry found to mark exit.")
 
-        # Handle Entry
+        # Handle Entry (force_exit=False)
         if user.is_blocked:
             raise HTTPException(status_code=403, detail="Student is blocked due to repeated late entries. Visit admin office.")
 
-        # Cooldown (1 min for testing instead of 30)
-        last_record = db.query(models.Attendance)\
-            .filter(models.Attendance.student_id == user.id)\
-            .order_by(models.Attendance.id.desc()).first()
+        if today_record:
+            # If they already entered and exited today: They are trying to re-enter
+            if today_record.exit_time is not None:
+                today_record.entry_time = now
+                today_record.exit_time = None
+                today_record.status = "Re-entered"
+                today_record.marked_by = marked_by
+                db.commit()
+                db.refresh(today_record)
+                return today_record
+            
+            # If they already entered today and did not exit yet:
+            # Check Cooldown (1 min for testing instead of 30)
+            diff = now - today_record.entry_time
+            if diff < timedelta(minutes=1): 
+                return today_record
+            raise HTTPException(status_code=400, detail="You have already entered today and are currently in campus.")
 
-        if last_record and last_record.exit_time is None:
-             # Already in campus
-             diff = now - last_record.entry_time
-             if diff < timedelta(minutes=1): 
-                 return last_record
-
+        # First entry of the day
         is_late, attn_status = await check_late_and_update(user, now, db)
-        
-        # Override the old attn_status (warning/blocked) with the new requested literal states
         entry_status_str = "LateEntry" if is_late else "OnTime"
         
         new_attn = models.Attendance(
