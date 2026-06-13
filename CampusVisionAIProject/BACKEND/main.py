@@ -1,6 +1,13 @@
+import sys
+import os
+
+# Add the directory containing this file to sys.path so nested imports resolve correctly
+current_dir = os.path.dirname(os.path.abspath(__file__))
+if current_dir not in sys.path:
+    sys.path.insert(0, current_dir)
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-import os
 
 app = FastAPI(title="CampusVisionAI Backend")
 
@@ -46,7 +53,6 @@ async def log_requests(request, call_next):
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 
-current_dir = os.path.dirname(os.path.abspath(__file__))
 frontend_dist = os.path.normpath(os.path.join(current_dir, "..", "FRONTEND", "dist"))
 
 if os.path.exists(frontend_dist):
