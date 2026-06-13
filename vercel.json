@@ -1,0 +1,14 @@
+{
+  "builds": [
+    {
+      "src": "CampusVisionAIProject/BACKEND/main.py",
+      "use": "@vercel/python"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "CampusVisionAIProject/BACKEND/main.py"
+    }
+  ]
+}
