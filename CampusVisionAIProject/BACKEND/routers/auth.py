@@ -1,6 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
+from sqlalchemy import or_
+from typing import Optional
 from datetime import timedelta
 import models, schemas, auth as authentication
 from database import get_db
@@ -8,8 +10,23 @@ from database import get_db
 router = APIRouter()
 
 @router.post("/login", response_model=schemas.Token)
-def login_for_access_token(db: Session = Depends(get_db), form_data: OAuth2PasswordRequestForm = Depends()):
-    users = db.query(models.User).filter(models.User.email == form_data.username).all()
+def login_for_access_token(
+    role: Optional[str] = None,
+    db: Session = Depends(get_db),
+    form_data: OAuth2PasswordRequestForm = Depends()
+):
+    query = db.query(models.User).filter(
+        or_(
+            models.User.email == form_data.username,
+            models.User.student_id == form_data.username
+        )
+    )
+    
+    if role:
+        db_role = "gate_man" if role == "gateman" else role
+        query = query.filter(models.User.role == db_role)
+        
+    users = query.all()
     
     matched_user = None
     for u in users:
@@ -20,7 +37,7 @@ def login_for_access_token(db: Session = Depends(get_db), form_data: OAuth2Passw
     if not matched_user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
+            detail="Incorrect username/ID or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
     

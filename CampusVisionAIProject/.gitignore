@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+BACKEND/venv/
+BACKEND/sql_app.db
+BACKEND/.env
+*.log
+
+# Node / Vite
+node_modules/
+FRONTEND/dist/
+FRONTEND/.env.local
+FRONTEND/.env.*.local
+
+# Editor/OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

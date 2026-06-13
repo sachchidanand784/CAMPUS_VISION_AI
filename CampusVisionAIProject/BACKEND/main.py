@@ -41,6 +41,30 @@ app.include_router(attendance.router, prefix="/api/attendance", tags=["Attendanc
 app.include_router(admin.router, prefix="/api/admin", tags=["Admin"])
 app.include_router(settings.router, prefix="/api/settings", tags=["Settings"])
 
-@app.get("/")
-def read_root():
-    return {"message": "Welcome to CampusVisionAI API"}
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
+import os
+
+# Resolve path to FRONTEND/dist
+current_dir = os.path.dirname(os.path.abspath(__file__))
+frontend_dist = os.path.normpath(os.path.join(current_dir, "..", "FRONTEND", "dist"))
+
+# Serve frontend if compiled
+if os.path.exists(frontend_dist):
+    assets_dir = os.path.join(frontend_dist, "assets")
+    if os.path.exists(assets_dir):
+        app.mount("/assets", StaticFiles(directory=assets_dir), name="assets")
+
+    @app.get("/{catchall:path}")
+    def serve_frontend(catchall: str):
+        # Fall through to API 404 if route starts with api/ or api
+        if catchall.startswith("api/") or catchall.startswith("api"):
+            return {"detail": "Not Found"}
+        index_path = os.path.join(frontend_dist, "index.html")
+        if os.path.exists(index_path):
+            return FileResponse(index_path)
+        return {"message": "CampusVisionAI API is running. Please compile the frontend."}
+else:
+    @app.get("/")
+    def read_root():
+        return {"message": "Welcome to CampusVisionAI API"}
