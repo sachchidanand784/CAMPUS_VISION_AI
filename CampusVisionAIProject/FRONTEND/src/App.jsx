@@ -48,13 +48,13 @@ const Navigation = ({ token, onLogout }) => {
 
   return (
     <header className="glass-effect" style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-      <div className="nav-container" style={{ display: 'flex', width: '100%', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div className="nav-container">
         <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '10px' }}>
            <div style={{ width: 35, height: 35, background: 'var(--primary-gradient)', borderRadius: '10px', display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'white', fontWeight: 900 }}>CV</div>
            <h1 style={{ color: 'var(--primary-blue)', margin: 0, fontSize: '1.5rem', fontWeight: 800 }}>CampusVisionAI</h1>
         </Link>
         
-        <nav style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
+        <nav className="nav-menu">
           <Link to="/" className="nav-link">Home</Link>
           <Link to="/#about" onClick={handleAboutClick} className="nav-link">About</Link>
           

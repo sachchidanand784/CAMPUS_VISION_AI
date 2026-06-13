@@ -452,7 +452,7 @@ const StudentDashboard = ({ token }) => {
                 </span>
               </div>
               <p style={{ color: '#3b82f6', fontWeight: 700, margin: '4px 0 10px', fontSize: '0.9rem' }}>{profile.student_id}</p>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', fontSize: '0.82rem', color: '#475569' }}>
+              <div className="profile-info-grid" style={{ fontSize: '0.82rem', color: '#475569' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><BookOpen size={14} color="#94a3b8" /> {profile.course}</div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Calendar size={14} color="#94a3b8" /> Year {profile.year}</div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Mail size={14} color="#94a3b8" /> {profile.email}</div>
