@@ -9,6 +9,8 @@ import LiveGate from './pages/LiveGate';
 
 import Home from './pages/Home';
 import GateManDashboard from './pages/GateManDashboard';
+import Contact from './pages/Contact';
+import { Home as HomeIcon, Info as InfoIcon, Mail as MailIcon } from 'lucide-react';
 
 const AxiosInterceptor = ({ onLogout }) => {
   const navigate = useNavigate();
@@ -39,6 +41,13 @@ const ProtectedRoute = ({ token, children }) => {
 const Navigation = ({ token, onLogout }) => {
   const [showLoginDropdown, setShowLoginDropdown] = React.useState(false);
 
+  const handleHomeClick = (e) => {
+    if (window.location.pathname === '/') {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
   const handleAboutClick = (e) => {
     if (window.location.pathname === '/') {
       e.preventDefault();
@@ -55,8 +64,15 @@ const Navigation = ({ token, onLogout }) => {
         </Link>
         
         <nav className="nav-menu">
-          <Link to="/" className="nav-link">Home</Link>
-          <Link to="/#about" onClick={handleAboutClick} className="nav-link">About</Link>
+          <Link to="/" onClick={handleHomeClick} className="nav-link" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <HomeIcon size={16} /> Home
+          </Link>
+          <Link to="/#about" onClick={handleAboutClick} className="nav-link" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <InfoIcon size={16} /> About
+          </Link>
+          <Link to="/contact" className="nav-link" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <MailIcon size={16} /> Contact Us
+          </Link>
           
           {!token ? (
             <div style={{ position: 'relative' }}>
@@ -105,6 +121,7 @@ function App() {
            <Route path="/" element={<Home />} />
            <Route path="/login" element={<Login setToken={setToken} />} />
            <Route path="/register" element={<Registration />} />
+           <Route path="/contact" element={<Contact />} />
            
            <Route path="/student" element={
              <ProtectedRoute token={token}><StudentDashboard token={token} /></ProtectedRoute>

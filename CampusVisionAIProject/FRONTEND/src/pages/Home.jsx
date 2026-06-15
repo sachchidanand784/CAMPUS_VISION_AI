@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   ShieldCheck, MapPin, Users, Mail, Phone, Linkedin, Github, 
@@ -7,6 +7,15 @@ import {
 import heroImage from '../assets/smart_campus_hero.png';
 
 const Home = () => {
+  useEffect(() => {
+    // Smooth scroll to hash anchor on load
+    if (window.location.hash === '#about') {
+      setTimeout(() => {
+        document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' });
+      }, 150);
+    }
+  }, []);
+
   return (
     <div className="home-page animate-fade-in" style={{ background: '#f8fafc' }}>
       
@@ -272,112 +281,16 @@ const Home = () => {
         </div>
       </section>
 
-      {/* ── CONTACT & DEVELOPER PROFILE SECTION ── */}
-      <section style={{ background: '#f8fafc', padding: '80px 20px', borderTop: '1px solid #e2e8f0' }}>
+      {/* ── CONTACT CTA SECTION ── */}
+      <section style={{ background: '#f8fafc', padding: '60px 20px', borderTop: '1px solid #e2e8f0', textAlign: 'center' }}>
         <div className="main-content" style={{ padding: 0 }}>
-          <div style={{ textAlign: 'center', marginBottom: '50px' }}>
-            <h2 style={{ fontSize: '2.25rem', fontWeight: 800, color: 'var(--text-main)', marginBottom: '12px' }}>Developer Contact</h2>
-            <p style={{ color: 'var(--text-muted)', maxWidth: '600px', margin: '0 auto', fontSize: '0.95rem' }}>
-              Have questions, feedback, or system integration inquiries? Reach out directly.
-            </p>
-          </div>
-
-          <div style={{ display: 'flex', gap: '40px', flexWrap: 'wrap' }}>
-            {/* Left: Contact Info cards */}
-            <div style={{ flex: '1', minWidth: '300px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <h3 style={{ fontSize: '1.25rem', color: 'var(--text-main)', marginBottom: '10px' }}>Contact Channels</h3>
-              
-              <a href="mailto:snsachidanand784@gmail.com" className="contact-item">
-                <div className="contact-icon-wrapper">
-                  <Mail size={20} />
-                </div>
-                <div>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>Email Address</div>
-                  <div style={{ fontSize: '0.95rem', fontWeight: 700 }}>snsachidanand784@gmail.com</div>
-                </div>
-              </a>
-
-              <a href="tel:9450885320" className="contact-item">
-                <div className="contact-icon-wrapper">
-                  <Phone size={20} />
-                </div>
-                <div>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>Mobile Number</div>
-                  <div style={{ fontSize: '0.95rem', fontWeight: 700 }}>+91 9450885320</div>
-                </div>
-              </a>
-
-              <a href="https://www.linkedin.com/in/784sachchidanandyadav" target="_blank" rel="noopener noreferrer" className="contact-item">
-                <div className="contact-icon-wrapper" style={{ color: '#0077b5', background: 'rgba(0,119,181,0.1)' }}>
-                  <Linkedin size={20} />
-                </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>LinkedIn Profile</div>
-                  <div style={{ fontSize: '0.95rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    784sachchidanandyadav <ExternalLink size={13} />
-                  </div>
-                </div>
-              </a>
-
-              <a href="https://github.com/sachchidanand784" target="_blank" rel="noopener noreferrer" className="contact-item">
-                <div className="contact-icon-wrapper" style={{ color: '#24292e', background: 'rgba(36,41,46,0.1)' }}>
-                  <Github size={20} />
-                </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>GitHub Handle</div>
-                  <div style={{ fontSize: '0.95rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    sachchidanand784 <ExternalLink size={13} />
-                  </div>
-                </div>
-              </a>
-            </div>
-
-            {/* Right: Message Form Mockup */}
-            <div style={{ flex: '1.2', minWidth: '300px' }}>
-              <div className="card glass-effect" style={{ height: '100%' }}>
-                <h3 style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px', fontSize: '1.25rem' }}>
-                  <MessageSquare size={20} color="var(--primary-blue)" /> Quick Inquiries
-                </h3>
-                <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '20px', lineHeight: 1.5 }}>
-                  Drop a message regarding project collaborations, deployment assistance, or custom features.
-                </p>
-                
-                <form onSubmit={(e) => { e.preventDefault(); alert("Mock Message Submitted Successfully!"); }} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                    <div className="form-group" style={{ flex: 1, minWidth: '130px' }}>
-                      <input type="text" placeholder="Your Name" required style={{ fontSize: '0.85rem', padding: '10px 14px' }} />
-                    </div>
-                    <div className="form-group" style={{ flex: 1, minWidth: '130px' }}>
-                      <input type="email" placeholder="Your Email" required style={{ fontSize: '0.85rem', padding: '10px 14px' }} />
-                    </div>
-                  </div>
-                  <div className="form-group">
-                    <input type="text" placeholder="Subject" required style={{ fontSize: '0.85rem', padding: '10px 14px' }} />
-                  </div>
-                  <div className="form-group">
-                    <textarea 
-                      placeholder="Type your message here..." 
-                      required 
-                      rows="3"
-                      style={{ 
-                        width: '100%', 
-                        padding: '10px 14px', 
-                        borderRadius: '12px', 
-                        border: '2px solid transparent', 
-                        background: '#f8fafc',
-                        fontFamily: 'inherit',
-                        fontSize: '0.85rem',
-                        resize: 'vertical'
-                      }}
-                    />
-                  </div>
-                  <button type="submit" className="btn btn-primary" style={{ padding: '12px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', fontSize: '0.9rem' }}>
-                    Send Message <ArrowRight size={16} />
-                  </button>
-                </form>
-              </div>
-            </div>
-          </div>
+          <h2 style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--text-main)', marginBottom: '8px' }}>Questions or Feedback?</h2>
+          <p style={{ color: 'var(--text-muted)', maxWidth: '600px', margin: '0 auto 24px', fontSize: '0.95rem' }}>
+            We'd love to hear from you. Get in touch with the developer for collaborations, custom features, or setup help.
+          </p>
+          <Link to="/contact" className="btn btn-primary" style={{ padding: '12px 30px', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+            Go to Contact Page <ArrowRight size={18} />
+          </Link>
         </div>
       </section>
 
