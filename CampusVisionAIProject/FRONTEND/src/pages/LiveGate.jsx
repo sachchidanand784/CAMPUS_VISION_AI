@@ -66,6 +66,7 @@ const LiveGate = () => {
   };
 
   const [manualId, setManualId] = useState('');
+  const [manualMode, setManualMode] = useState('entry');
   const handleIdSubmit = async (e) => {
     e.preventDefault();
     if (!manualId) return;
@@ -75,7 +76,8 @@ const LiveGate = () => {
       const res = await axios.post(`${apiUrl}/api/attendance/mark/id`, {
         student_id: manualId,
         lat: coords.lat,
-        lon: coords.lon
+        lon: coords.lon,
+        mode: manualMode
       });
       setStatus('success');
       let detail = 'Authorized';
@@ -84,7 +86,7 @@ const LiveGate = () => {
       else if (res.data.status === 'Re-exited') detail = 'Re-exited';
       else if (res.data.status === 'LateEntry' || res.data.is_late) detail = 'Late Entry';
       else detail = 'On Time';
-      setMessage(`Manual Entry Authorized for ${manualId}: ${detail}`);
+      setMessage(`Manual ${manualMode === 'entry' ? 'Entry' : 'Exit'} Authorized for ${manualId}: ${detail}`);
       setTimeout(() => {
         setStatus('idle');
         setManualId('');
@@ -112,7 +114,7 @@ const LiveGate = () => {
                     <span style={{ fontSize: '0.875rem', fontWeight: 600 }}>GATE MONITOR ALPHA</span>
                 </div>
 
-                <div style={{ position: 'relative', height: '500px', background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div className="live-gate-monitor">
                     {showWebcam ? (
                         <>
                             <Webcam ref={webcamRef} screenshotFormat="image/jpeg" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -194,6 +196,26 @@ const LiveGate = () => {
                 </div>
                 <p style={{ marginBottom: '1.5rem', fontSize: '0.875rem' }}>Use Student ID when biometric mismatch occurs or device is missing.</p>
                 
+                {/* Mode Selector */}
+                <div style={{ display: 'flex', gap: '8px', marginBottom: '1rem' }}>
+                    <button 
+                        type="button" 
+                        onClick={() => setManualMode('entry')}
+                        className={`btn ${manualMode === 'entry' ? 'btn-primary' : 'btn-outline'}`}
+                        style={{ flex: 1, padding: '10px 8px', fontSize: '0.85rem' }}
+                    >
+                        Entry
+                    </button>
+                    <button 
+                        type="button" 
+                        onClick={() => setManualMode('exit')}
+                        className={`btn ${manualMode === 'exit' ? 'btn-primary' : 'btn-outline'}`}
+                        style={{ flex: 1, padding: '10px 8px', fontSize: '0.85rem' }}
+                    >
+                        Exit
+                    </button>
+                </div>
+
                 <form onSubmit={handleIdSubmit}>
                     <div className="form-group">
                         <div style={{ position: 'relative' }}>
@@ -208,7 +230,7 @@ const LiveGate = () => {
                         </div>
                     </div>
                     <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '1rem' }}>
-                        AUTHORIZE ENTRY
+                        {manualMode === 'entry' ? 'AUTHORIZE ENTRY' : 'AUTHORIZE EXIT'}
                     </button>
                 </form>
             </div>

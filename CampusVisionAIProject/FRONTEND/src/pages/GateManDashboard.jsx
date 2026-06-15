@@ -218,12 +218,17 @@ const GateManDashboard = ({ token }) => {
     finally { setMarking(false); }
   };
 
-  const markAttendance = async () => {
+  const markAttendance = async (mode = 'entry') => {
     if (!studentDetails) return;
     setMarking(true);
+    setEntryError(null);
+    setEntrySuccess(null);
     try {
-      await axios.post(`${API}/api/attendance/mark/id`, { student_id: studentDetails.student_id }, { headers });
-      setEntrySuccess(`✅ Entry recorded for ${studentDetails.name}`);
+      await axios.post(`${API}/api/attendance/mark/id`, { 
+        student_id: studentDetails.student_id,
+        mode: mode
+      }, { headers });
+      setEntrySuccess(`✅ ${mode === 'entry' ? 'Entry' : 'Exit'} recorded for ${studentDetails.name}`);
       setStudentDetails(null);
       setStudentId('');
       // refresh counts
@@ -333,14 +338,24 @@ const GateManDashboard = ({ token }) => {
                   <div style={{ color: '#94a3b8', fontSize: '0.8rem' }}>{studentDetails.course} · Year {studentDetails.year}</div>
                 </div>
               </div>
-              <button
-                className="btn btn-primary"
-                onClick={markAttendance}
-                disabled={marking}
-                style={{ width: '100%', padding: '13px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', fontSize: '0.95rem' }}
-              >
-                <LogIn size={18} /> {marking ? 'RECORDING…' : 'GRANT CAMPUS ACCESS'}
-              </button>
+              <div style={{ display: 'flex', gap: '10px', width: '100%', flexWrap: 'wrap' }}>
+                <button
+                  className="btn btn-primary"
+                  onClick={() => markAttendance('entry')}
+                  disabled={marking}
+                  style={{ flex: 1, minWidth: '130px', padding: '13px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', fontSize: '0.9rem' }}
+                >
+                  <LogIn size={18} /> {marking ? '...' : 'GRANT ENTRY'}
+                </button>
+                <button
+                  className="btn btn-outline"
+                  onClick={() => markAttendance('exit')}
+                  disabled={marking}
+                  style={{ flex: 1, minWidth: '130px', padding: '13px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', fontSize: '0.9rem', color: '#ea580c', borderColor: '#fdba74' }}
+                >
+                  <LogOut size={18} /> {marking ? '...' : 'RECORD EXIT'}
+                </button>
+              </div>
             </div>
           )}
         </div>

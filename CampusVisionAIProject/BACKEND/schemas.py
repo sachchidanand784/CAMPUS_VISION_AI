@@ -74,6 +74,7 @@ class IDAttendanceRequest(BaseModel):
     student_id: str
     lat: Optional[float] = None
     lon: Optional[float] = None
+    mode: Optional[str] = "entry" # 'entry' or 'exit'
 
 class GeoFenceBase(BaseModel):
     latitude: float

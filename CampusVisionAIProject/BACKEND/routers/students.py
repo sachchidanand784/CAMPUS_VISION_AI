@@ -34,6 +34,16 @@ async def register_admin_specific(user: schemas.UserCreate, background_tasks: Ba
 
 async def register_user_logic(user: schemas.UserCreate, background_tasks: BackgroundTasks, db: Session):
     try:
+        # Enforce face validation for students
+        if user.role == "student":
+            if not user.face_image_base64:
+                raise HTTPException(status_code=400, detail="Face capture is required for student biometric entry.")
+            from services.face_service import validate_face_in_image
+            try:
+                validate_face_in_image(user.face_image_base64)
+            except ValueError as ve:
+                raise HTTPException(status_code=400, detail=str(ve))
+
         # db_user = db.query(models.User).filter(models.User.email == user.email).first()
         # if db_user:
         #     raise HTTPException(status_code=400, detail="Email already registered")

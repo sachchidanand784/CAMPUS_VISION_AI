@@ -21,6 +21,7 @@ class IDAttendanceRequest(BaseModel):
     student_id: str
     lat: Optional[float] = None
     lon: Optional[float] = None
+    mode: Optional[str] = "entry" # 'entry' or 'exit'
 
 def calculate_distance(lat1, lon1, lat2, lon2):
     # Haversine formula
@@ -149,7 +150,7 @@ async def mark_attendance_id(
         if not user:
             raise HTTPException(status_code=404, detail="Student ID not found")
 
-        return await process_attendance(user, db, marked_by="gateman")
+        return await process_attendance(user, db, force_exit=(req.mode == "exit"), marked_by="gateman")
     except HTTPException:
         raise
     except Exception as e:

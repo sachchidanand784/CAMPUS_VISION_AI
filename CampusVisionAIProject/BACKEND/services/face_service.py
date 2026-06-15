@@ -84,3 +84,58 @@ def match_face(base64_image: str, stored_url: str) -> bool:
                 os.remove(img2_path)
             except Exception:
                 pass
+
+def validate_face_in_image(base64_image: str) -> None:
+    """
+    Validates that the base64-encoded image contains exactly one face using OpenCV's Haar Cascade.
+    Raises ValueError with a user-friendly error message if no face is detected or if multiple faces are detected.
+    """
+    if not base64_image:
+        raise ValueError("No image provided. Please upload a profile photo.")
+        
+    # Clean up base64 prefix if exists
+    if "," in base64_image:
+        header, encoded = base64_image.split(",", 1)
+    else:
+        encoded = base64_image
+        
+    try:
+        import cv2
+        import numpy as np
+        
+        # Decode base64 to image
+        nparr = np.frombuffer(base64.b64decode(encoded), np.uint8)
+        img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+        if img is None:
+            raise ValueError("Invalid image file. Please upload a valid image.")
+            
+        # Convert to grayscale
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        
+        # Load Haar cascade classifier
+        cascade_path = os.path.join(cv2.data.haarcascades, "haarcascade_frontalface_default.xml")
+        face_cascade = cv2.CascadeClassifier(cascade_path)
+        if face_cascade.empty():
+            print("WARNING: Failed to load Haar Cascade face classifier.")
+            # Fallback if cascade cannot be loaded for some reason
+            return
+        
+        # Detect faces
+        faces = face_cascade.detectMultiScale(
+            gray, 
+            scaleFactor=1.1, 
+            minNeighbors=5, 
+            minSize=(30, 30)
+        )
+        
+        if len(faces) == 0:
+            raise ValueError("No face detected in the image. Please upload a clear photo of your face.")
+        elif len(faces) > 1:
+            raise ValueError("Multiple faces detected in the image. Please upload a photo with only your face.")
+            
+    except ValueError:
+        raise
+    except Exception as e:
+        print("Error during face validation:", e)
+        raise ValueError("Failed to process the uploaded photo. Please upload a valid, clear image of your face.")
+
