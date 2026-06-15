@@ -2,7 +2,8 @@ import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   ShieldCheck, MapPin, Users, Mail, Phone, Linkedin, Github, 
-  ArrowRight, ShieldAlert, Cpu, Award, MessageSquare, ExternalLink, Activity
+  ArrowRight, ShieldAlert, Cpu, Award, MessageSquare, ExternalLink, Activity,
+  Scan, Sliders
 } from 'lucide-react';
 import heroImage from '../assets/smart_campus_hero.png';
 
@@ -150,7 +151,7 @@ const Home = () => {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '30px' }}>
           <div className="card glass-effect" style={{ borderTop: '4px solid #3b82f6', transition: 'all 0.3s ease' }}>
             <div className="contact-icon-wrapper" style={{ width: '56px', height: '56px', borderRadius: '14px', marginBottom: '20px', fontSize: '1.5rem' }}>
-              <Cpu size={24} />
+              <Scan size={24} />
             </div>
             <h3 style={{ marginBottom: '12px', fontSize: '1.25rem' }}>Facial Biometrics</h3>
             <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', lineHeight: 1.6 }}>
@@ -170,7 +171,7 @@ const Home = () => {
 
           <div className="card glass-effect" style={{ borderTop: '4px solid #f59e0b', transition: 'all 0.3s ease' }}>
             <div className="contact-icon-wrapper" style={{ width: '56px', height: '56px', borderRadius: '14px', marginBottom: '20px', fontSize: '1.5rem', color: '#f59e0b', background: 'rgba(245,158,11,0.1)' }}>
-              <ShieldAlert size={24} />
+              <Sliders size={24} />
             </div>
             <h3 style={{ marginBottom: '12px', fontSize: '1.25rem' }}>Discipline Automation</h3>
             <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', lineHeight: 1.6 }}>

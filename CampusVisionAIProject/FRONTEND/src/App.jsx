@@ -10,7 +10,7 @@ import LiveGate from './pages/LiveGate';
 import Home from './pages/Home';
 import GateManDashboard from './pages/GateManDashboard';
 import Contact from './pages/Contact';
-import { Home as HomeIcon, Info as InfoIcon, Mail as MailIcon } from 'lucide-react';
+import { Home as HomeIcon, BookOpen as BookOpenIcon, Mail as MailIcon } from 'lucide-react';
 
 const AxiosInterceptor = ({ onLogout }) => {
   const navigate = useNavigate();
@@ -68,7 +68,7 @@ const Navigation = ({ token, onLogout }) => {
             <HomeIcon size={16} /> Home
           </Link>
           <Link to="/#about" onClick={handleAboutClick} className="nav-link" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <InfoIcon size={16} /> About
+            <BookOpenIcon size={16} /> About
           </Link>
           <Link to="/contact" className="nav-link" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             <MailIcon size={16} /> Contact Us
